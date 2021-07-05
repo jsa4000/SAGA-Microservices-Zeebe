@@ -143,7 +143,7 @@ In order to create and view Zeebe workflows, it is recommended to use the Tool `
     wget https://downloads.camunda.cloud/release/camunda-modeler/4.8.1/camunda-modeler-4.8.1-mac.dmg
     ```
 
-2. Open a BPMN example
+2. Open a BPMN example `emergency-process.bpmn`
 
     ```bash
     # Clone following repository
@@ -153,7 +153,9 @@ In order to create and view Zeebe workflows, it is recommended to use the Tool `
     # Zeebe curren version has changed the format of the files. i.e 'emergencyType == "Fire"' > '= emergencyType = "Fire"'
     ```
 
-3. Check the example and inspect the properties and types for the tasks
+    ![Zeebe Process](images/simple-process.png)
+
+3. Check the example `emergency-process.bpmn` and inspect the properties and types for the tasks
 
     * General: The `Id` (emergency-process) and the `Name` (Emergecy Process) of the process. General properties appear when no other item is selected
     * Tasks: `Classify Emergency`, `Coordinate With Hospital`, `Coordintate With Firefighters`
@@ -241,9 +243,11 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     zbctl deploy workflows/emergency-process-v3.bpmn --insecure
     ```
 
-3. Check current workflow within the Zeebe Operator at (http://localhost/#/).
+3. Check current workflow within the Zeebe Operator at (http://localhost/#/) or (http://localhost:8080).
 
    > the `emergency-process` must appear in the dashboard with Zero instances yet
+
+    ![Zeebe Operator](images/zeebe-operator.png)
 
 4. Create Workflow Instances.
 
@@ -279,7 +283,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 6. Starting a simple Spring Boot Zeebe Worker
 
     ```bash
-    cd  zeebe-worker-spring-boot-example/
+    cd  src/zeebe-worker-spring-boot/
     mvn spring-boot:run
     ```
 
