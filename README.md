@@ -205,7 +205,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
         Partition 1 : Leader, Healthy
     ```
 
-## Demo
+## Simple Demo
 
 ![Helm Chart](./images/example.png)
 
@@ -280,6 +280,8 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     > At this point, you will see that they are both stuck at the `Classify Emergency` task. This is because you don't have workers for such tasks, so the process will wait in that state until we provide one of these workers.
 
+    ![Process Waiting for Workers](images/manual-process-waiting.png)
+
 6. Starting a simple Spring Boot Zeebe Worker
 
     ```bash
@@ -295,7 +297,9 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     > If you refresh Operate (http://localhost:80) you will find both Instances completed. Check Finished Instances to show the finished instances. In the graph, the terminal nodes show the number and final statuses (succesfull).
 
-## DEMO Sync
+    ![Process Finished](images/manual-process-finished.png)
+
+## Synchronous Demo (via REST)
 
 1. Deploy a local Zeebe environment for development using docker-compose
 
@@ -312,6 +316,11 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     ```
 
 3. Open and run `zeebe-rest-spring-boot`
+
+    ```bash
+    cd  src/zeebe-rest-spring-boot/
+    mvn spring-boot:run
+    ```
 
 4. Test Following endpoints
 
@@ -331,8 +340,9 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 5. Verify current calls using Zeebe Operate.
 
-## DEMO EVENTS
+    ![All Process run](images/rest-process-all.png)
 
+## Asynchronous Demo (events)
 
 1. Deploy a local Zeebe environment for development using docker-compose
 
@@ -341,7 +351,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     docker-compose -f docker/docker-compose.yml up
     ```
 
-2. Deploy `emergency-process-v2`into local >eebe cluster
+2. Deploy `emergency-process-v2` into local Zeebe cluster
 
     ```bash
     # Deploy bpmn version 2
@@ -349,6 +359,11 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     ```
 
 3. Open and run `zeebe-rest-spring-boot`
+
+    ```bash
+    cd  src/zeebe-rest-spring-boot/
+    mvn spring-boot:run
+    ```
 
 4. Test Following endpoints
 
@@ -361,6 +376,8 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     # Returns an object of type 'Fire'
     curl http://localhost:8081/classify/fire
     ```
+
+    ![Process Waiting for Message](images/rest-process-waiting.png)
 
 5. Publish Message Event to Zeebe so it continues with the workflow
 
@@ -376,6 +393,8 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 6. Verify current calls using Zeebe Operate.
 
-## DEMO SAGA
+    ![Process Waiting for Message](images/rest-process-finished.png)
+
+## SAGA Pattern Demo
 
 ![Zeebe](./images/saga-example.png)

@@ -6,8 +6,17 @@ spring:
 
 server:
   port: 8081
+  shutdown: graceful
 
 management:
+  health:
+    livenessState.enabled: true
+    readinessState.enabled: true
+  endpoint:
+    health:
+      show-components: always
+      probes.enabled: true
+      show-details: always
   endpoints:
     web:
       exposure:
@@ -16,11 +25,31 @@ management:
 zeebe:
   client:
     worker.defaultName: ${spring.application.name}
-    broker.gatewayAddress: 127.0.0.1:26500
-    security.plaintext: true
     job.timeout: 5000
 
 logging:
   level:
     root: info
     org.springframework: warn
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+zeebe:
+  client:
+    gateway.address: 127.0.0.1:26500
+    security.plaintext: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+zeebe:
+  client:
+    gateway.address: zeebe-dev-zeebe-gateway.zeebe.svc.cluster.local:26500
+    security.plaintext: true
