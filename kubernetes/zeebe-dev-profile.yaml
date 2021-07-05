@@ -3,7 +3,8 @@ zeebe-cluster-helm:
   partitionCount: 1
   replicationFactor: 1
   elasticsearch:
-    imageTag: 6.8.5 
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss"
+    imageTag: 7.10.2
     replicas: 1
     minimumMasterNodes: 1
 # Permit co-located instances for solitary minikube virtual machines.

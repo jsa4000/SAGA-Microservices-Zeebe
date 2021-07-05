@@ -13,7 +13,25 @@ With Zeebe you can:
 * Export workflow data for monitoring and analysis
 * Engage with an active community
 
-## Installation
+## Installation
+
+### Docker
+
+This installation requires `docker-compose` and will install the following applications:
+
+* Zeebe Worker
+* Zeebe Operate
+* ElasticSearch instances.
+
+To perform the installation simply use
+
+`docker-compose -f docker/docker-compose.yaml up`
+
+Zeebe operate can be accessed using this URL (http://localhost:8080) (demo/demo)
+
+In order to connect to Zeebe Workers via Gateway use the `localhost:26500`
+
+### Kubernetes
 
 ![Helm Chart](./images/charts.png)
 
@@ -75,15 +93,16 @@ Follownig are the main repositories that are going to be used.
 
 5. Check the services created
 
+    `kubectl get svc -n zeebe`
+
     ```bash
-    elasticsearch-master                           ClusterIP      10.96.134.30     <none>        9200/TCP,9300/TCP              6m13s
-    elasticsearch-master-headless                  ClusterIP      None             <none>        9200/TCP,9300/TCP              6m13s
-    kubernetes                                     ClusterIP      10.96.0.1        <none>        443/TCP                        6d1h
-    zeebe-dev-ingress-nginx-controller             LoadBalancer   10.97.9.104      localhost     80:32512/TCP,443:30663/TCP     6m13s
-    zeebe-dev-ingress-nginx-controller-admission   ClusterIP      10.102.87.19     <none>        443/TCP                        6m13s
-    zeebe-dev-zeebe                                ClusterIP      None             <none>        9600/TCP,26502/TCP,26501/TCP   6m13s
-    zeebe-dev-zeebe-gateway                        ClusterIP      10.108.27.251    <none>        9600/TCP,26500/TCP             6m13s
-    zeebe-dev-zeebe-operate-helm                   ClusterIP      10.109.176.158   <none>        80/TCP                         6m13s
+    elasticsearch-master                           ClusterIP      10.103.158.218   <none>        9200/TCP,9300/TCP              29m
+    elasticsearch-master-headless                  ClusterIP      None             <none>        9200/TCP,9300/TCP              29m
+    zeebe-dev-ingress-nginx-controller             LoadBalancer   10.105.72.236    localhost     80:30131/TCP,443:31296/TCP     29m
+    zeebe-dev-ingress-nginx-controller-admission   ClusterIP      10.96.216.239    <none>        443/TCP                        29m
+    zeebe-dev-zeebe                                ClusterIP      None             <none>        9600/TCP,26502/TCP,26501/TCP   29m
+    zeebe-dev-zeebe-gateway                        ClusterIP      10.97.13.10      <none>        9600/TCP,26500/TCP             29m
+    zeebe-dev-zeebe-operate-helm                   ClusterIP      10.111.15.0      <none>        80/TCP                         29m
     ```
 
 6. Test `Zeebe Operate` using the loadbalancer created by the ingress controller. (http://localhost/#/login) (demo/demo)
@@ -92,7 +111,7 @@ Follownig are the main repositories that are going to be used.
 
     ```bash
     # Bind the port from the current service 80 to the local 8080. http://localhost:8080/#/login
-    kubectl port-forward svc/zeebe-dev-ingress-nginx-controller 8080:80
+    kubectl port-forward -n zeebe svc/zeebe-dev-ingress-nginx-controller 8080:80
     ```
 
 7. Communication inside the Cluster using `Zeebe Gateway`
@@ -101,7 +120,7 @@ Follownig are the main repositories that are going to be used.
 
     ```bash
     # This allows from dev to connect through the cluster using local java applications or Zeebe CLI
-    kubectl port-forward svc/zeebe-dev-zeebe-gateway 26500:26500
+    kubectl port-forward -n zeebe svc/zeebe-dev-zeebe-gateway 26500:26500
     ```
 
 ## Workflows
@@ -151,7 +170,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     ```bash
     # Macos Version
-    wget https://github.com/zeebe-io/zeebe/releases/download/0.26.0/zbctl.darwin
+    wget https://github.com/camunda-cloud/zeebe/releases/download/1.0.1/zbctl.darwin
     chmod +x zbctl.darwin
 
     # Copy binary file into global so it can bee used from any location
@@ -160,9 +179,11 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 2. Connect inside the Cluster using `Zeebe Gateway`
 
+    > Using docker-compose it is not necessary since `localhost:26500` is already exposed
+
     ```bash
     # This allows from dev to connect through the cluster using local java applications or Zeebe CLI
-    kubectl port-forward svc/zeebe-dev-zeebe-gateway 26500:26500
+    kubectl port-forward -n zeebe svc/zeebe-dev-zeebe-gateway 26500:26500
     ```
 
 3. Test and get the current status
@@ -175,10 +196,10 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     Cluster size: 1
     Partitions count: 1
     Replication factor: 1
-    Gateway version: 0.26.0
+    Gateway version: 1.0.0
     Brokers:
-    Broker 0 - zeebe-dev-zeebe-0.zeebe-dev-zeebe.default.svc.cluster.local:26501
-        Version: 0.26.0
+    Broker 0 - 172.18.0.3:26501
+        Version: 1.0.0
         Partition 1 : Leader, Healthy
     ```
 
@@ -188,10 +209,12 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 1. Connect to the Zeebe Cluster.
 
-    In order to interact with the services inside the cluster you need to use `port-forward` to route traffic from your environment to the cluster. 
+    In order to interact with the services inside the cluster you need to use `port-forward` to route traffic from your environment to the cluster.
+
+    > Using docker-compose it is not necessary since `localhost:26500` is already exposed
 
     ```bash
-    kubectl port-forward svc/zeebe-dev-zeebe-gateway 26500:26500
+    kubectl port-forward -n zeebe svc/zeebe-dev-zeebe-gateway 26500:26500
     ```
 
 2. Once you have your connection to your cluster you can deploy our process definition by running:

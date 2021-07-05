@@ -30,7 +30,7 @@ services:
       - zeebe
       - elasticsearch
     volumes:
-      - ./application.operate.yml:/usr/local/operate/config/application.yml
+      - ./application.operate.yaml:/usr/local/operate/config/application.yml
     networks:
       - zeebe_network
   elasticsearch:

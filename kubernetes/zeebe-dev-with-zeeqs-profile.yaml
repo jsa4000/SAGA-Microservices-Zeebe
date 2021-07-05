@@ -19,7 +19,8 @@ zeebe:
   envTemplated: 
     ZEEBE_HAZELCAST_REMOTE_ADDRESS: "{{ .Release.Name }}-hazelcast"
   elasticsearch:
-    imageTag: 6.8.5 
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss"
+    imageTag: 7.10.2 
     replicas: 1
     minimumMasterNodes: 1
   # Permit co-located instances for solitary minikube virtual machines.
