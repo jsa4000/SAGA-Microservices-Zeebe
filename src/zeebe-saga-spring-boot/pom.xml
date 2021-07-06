@@ -23,6 +23,7 @@
     <zeebe.version>1.0.0</zeebe.version>
     <lombok.version>1.18.18</lombok.version>
     <spring-mongodb.version>2.4.2</spring-mongodb.version>
+    <springfox.version>3.0.0</springfox.version>
   </properties>
 
   <modules>

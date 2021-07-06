@@ -13,6 +13,42 @@ services:
     networks:
       - zeebe_network
 
+  car:
+    container_name: car
+    image: jsa4000/car-microservice:1.0.0-SNAPSHOT
+    restart: always
+    hostname: car
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - 8083:8083
+    networks:
+      - zeebe_network
+
+  flight:
+    container_name: flight
+    image: jsa4000/flight-microservice:1.0.0-SNAPSHOT
+    restart: always
+    hostname: flight
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - 8084:8084
+    networks:
+      - zeebe_network
+
+  hotel:
+    container_name: hotel
+    image: jsa4000/hotel-microservice:1.0.0-SNAPSHOT
+    restart: always
+    hostname: hotel
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - 8082:8082
+    networks:
+      - zeebe_network
+
 networks:
   zeebe_network:
     external:

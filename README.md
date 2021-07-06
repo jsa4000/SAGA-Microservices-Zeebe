@@ -430,6 +430,25 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     paketobuildpacks/builder                            base                                                    1f124c766673   41 years ago    661MB
      ```
 
+    To scan for vulnerabilities docker has introduced an option for scanning the image, using **Snyk** provider by default.
+
+    ```bash
+    # Scan using the name of the image created priously
+    docker scan --severity high jsa4000/car-microservice:1.0.0-SNAPSHOT
+
+    Testing jsa4000/car-microservice:1.0.0-SNAPSHOT...
+
+    Package manager:   deb
+    Project name:      docker-image|jsa4000/car-microservice
+    Docker image:      jsa4000/car-microservice:1.0.0-SNAPSHOT
+    Platform:          linux/amd64
+
+    ✓ Tested 97 dependencies for known vulnerabilities, no vulnerable paths found.
+
+    For more free scans that keep your images secure, sign up to Snyk at https://dockr.ly/3ePqVcp
+
+    ```
+
 3. Deploy a local environment for development using docker-compose
 
     > This method use the docker compose v2 with docker compose integrated into Docker CLI. It shares the same docker network (`zeebe_network`)
@@ -446,7 +465,8 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     # Deploy Zeebe Cluster
     docker compose --project-name zeebe -f docker/docker-compose.yaml up
 
-    # Deploy MongoDB Cluster
+    # Deploy MongoDB Cluster. 
+    #   MONGO_REPLICASET_HOST is used to connect with mongodb using docker internal DNS name. i.e  uri: mongodb://mongo:27017/booking
     MONGO_REPLICASET_HOST=mongo docker compose --project-name zeebe  -f src/zeebe-saga-spring-boot/docker/docker-compose-mongo.yaml up
 
     # Deploy Microservices
@@ -457,12 +477,44 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     ```bash
     # Booking Service
+    curl http://localhost:8081/actuator/health | jq '. | {status: .status, liveness: .components.livenessState.status, readiness: .components.readinessState.status,}'   
+
+    # Car Service
+    curl http://localhost:8083/actuator/health | jq '. | {status: .status, liveness: .components.livenessState.status, readiness: .components.readinessState.status,}'   
+
+    # Flight Service
+    curl http://localhost:8084/actuator/health | jq '. | {status: .status, liveness: .components.livenessState.status, readiness: .components.readinessState.status,}'   
+
+    # Hotel Service
+    curl http://localhost:8082/actuator/health | jq '. | {status: .status, liveness: .components.livenessState.status, readiness: .components.readinessState.status,}'   
+
+
+    # To get all the fields us . instead
     curl http://localhost:8081/actuator/health | jq .
     ```
 
-5. Deploy `saga-example.bpmn` into local Zeebe cluster
+5. Test Microservices operations using [Swagger UI](http://localhost:8083/swagger-ui/) or Postman.
+
+    > Import **Postman** correction located at `/src/zeebe-saga-spring-boot/Booking.postman_collection.json`
+
+    Create new booking:
+
+    ```bash
+    curl -X POST "http://localhost:8083/booking/" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"active\":true,\"clientId\":\"string\",\"createdAt\":\"2021-07-06T12:29:58.686Z\",\"fromDate\":\"2021-07-06T12:29:58.686Z\",\"id\":\"1234\",\"resourceId\":\"string\",\"toDate\":\"2021-07-06T12:29:58.686Z\"}"
+    curl -X POST "http://localhost:8083/booking/" -H  "accept: */*" -H  "Content-Type: application/json" -d "{\"active\":true,\"clientId\":\"string\",\"createdAt\":\"2021-07-06T12:29:58.686Z\",\"fromDate\":\"2021-07-06T12:29:58.686Z\",\"id\":\"2345\",\"resourceId\":\"string\",\"toDate\":\"2021-07-06T12:29:58.686Z\"}"
+    ```
+
+    Get all bookings stored:
+
+    ```bash
+    curl -X GET "http://localhost:8083/booking/" -H  "accept: */*" | jq .
+    ```
+
+6. Deploy `saga-example.bpmn` into local Zeebe cluster
 
     > It can be deployed directly by using **Camunda Modeler**
+
+    > Check all `simulateError` headers are set to `false`
 
     ```bash
     # Deploy bpmn version 2
@@ -470,3 +522,41 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     ```
 
     ![Zeebe](./images/saga-example.png)
+
+7. Submit new booking
+
+    > This start a SAGA
+
+    ```bash
+    curl --location --request POST 'http://localhost:8081/booking/' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "id" : "0",
+        "clientId":"123",
+        "resourceId":"987",
+        "fromDate":"2021-02-22T14:52:44.494264+01:00",
+        "toDate":"2021-03-06T14:52:44.495451+01:00",
+        "createdAt":"2021-02-10T14:52:44.495469+01:00",
+        "active":false
+    }'
+    ```
+
+    This returns all the identifiers created by the workers (tasks)
+
+    ```bash
+    {
+        "id": "0",
+        "clientId": "123",
+        "houseBookingId": "dd55d06b-43cc-40d2-8831-401ad40341b7",
+        "carBookingId": "2df565fe-4e02-4c93-8bb8-9c9115fb8be6",
+        "flightBookingId": "e9b55a33-5b72-4182-b22e-59595b6b4556",
+        "fromDate": "2021-02-22T13:52:44.494264Z",
+        "toDate": "2021-03-06T13:52:44.495451Z",
+        "createdAt": "2021-02-10T13:52:44.495469Z",
+        "active": false
+    }
+    ```
+
+8. Check the Zeebe Operate whether the Process has been finished.
+
+9.  Try to change the header `simulateError` to `true` to one task to force the compensation.
