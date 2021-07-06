@@ -1,0 +1,19 @@
+version: '3.5'
+services:
+
+  booking:
+    container_name: booking
+    image: jsa4000/booking-microservice:1.0.0-SNAPSHOT 
+    restart: always
+    hostname: booking
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - 8081:8081
+    networks:
+      - zeebe_network
+
+networks:
+  zeebe_network:
+    external:
+      name: zeebe_network

@@ -25,6 +25,7 @@ management:
 zeebe:
   client:
     worker.defaultName: ${spring.application.name}
+    job.timeout: 5000
 
 logging:
   level:
@@ -39,7 +40,7 @@ spring:
 
 zeebe:
   client:
-    gateway.address: 127.0.0.1:26500
+    broker.gatewayAddress: localhost:26500
     security.plaintext: true
 
 ---
@@ -50,5 +51,5 @@ spring:
 
 zeebe:
   client:
-    gateway.address: zeebe-dev-zeebe-gateway.zeebe.svc.cluster.local:26500
+    broker.gatewayAddress: zeebe-dev-zeebe-gateway.zeebe.svc.cluster.local:26500
     security.plaintext: true

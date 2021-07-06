@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.example</groupId>
 		<artifactId>zeebe-saga-spring-boot</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>zeebe-spring</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>zeebe</name>
 	<description>Demo project for Spring Boot</description>
 

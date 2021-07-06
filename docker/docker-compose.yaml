@@ -1,13 +1,7 @@
-version: "2"
-
-networks:
-  zeebe_network:
-
-volumes:
-  zeebe_data:
-  zeebe_elasticsearch_data:
+version: "3.5"
 
 services:
+  
   zeebe:
     image: camunda/zeebe:1.0.0
     environment:
@@ -22,6 +16,7 @@ services:
       - elasticsearch
     networks:
       - zeebe_network
+
   operate:
     image: camunda/operate:1.0.0
     ports:
@@ -33,6 +28,7 @@ services:
       - ./application.operate.yaml:/usr/local/operate/config/application.yml
     networks:
       - zeebe_network
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     ports:
@@ -45,3 +41,11 @@ services:
       - zeebe_elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - zeebe_network
+
+networks:
+  zeebe_network:
+    name: zeebe_network
+
+volumes:
+  zeebe_data:
+  zeebe_elasticsearch_data:

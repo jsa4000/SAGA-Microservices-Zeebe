@@ -6,17 +6,17 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.3.1.RELEASE</version>
+    <version>2.4.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>com.example</groupId>
   <artifactId>zeebe-saga-spring-boot</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>root</name>
 
-<properties>
+  <properties>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <java.version>11</java.version>
@@ -33,5 +33,48 @@
     <module>car-microservice</module>
     <module>flight-microservice</module>
   </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <configuration>
+            <layers>
+              <enabled>true</enabled>
+            </layers>
+            <image>
+              <name>jsa4000/${project.artifactId}:${project.version}</name>
+              <env>
+                <BP_JVM_VERSION>11</BP_JVM_VERSION>
+                <BP_OCI_DESCRIPTION>Spring Boot Microservice</BP_OCI_DESCRIPTION>
+                <BP_IMAGE_LABELS>tags="Microservice"</BP_IMAGE_LABELS>
+                <BPE_APPEND_JAVA_TOOL_OPTIONS>-XX:MaxDirectMemorySize=10M</BPE_APPEND_JAVA_TOOL_OPTIONS>
+                <BPE_DELIM_JAVA_TOOL_OPTIONS xml:space="preserve"> </BPE_DELIM_JAVA_TOOL_OPTIONS>
+                <!-- Reduced thread counter because memory issues using resources limits in kubernetes -->
+                <BPE_OVERRIDE_BPL_JVM_THREAD_COUNT>1</BPE_OVERRIDE_BPL_JVM_THREAD_COUNT>
+              </env>
+            </image>
+            <excludes>
+              <exclude>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+              </exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

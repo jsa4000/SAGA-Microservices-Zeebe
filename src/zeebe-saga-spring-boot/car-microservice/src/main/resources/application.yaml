@@ -10,8 +10,17 @@ spring:
 
 server:
   port: 8083
+  shutdown: graceful
 
 management:
+  health:
+    livenessState.enabled: true
+    readinessState.enabled: true
+  endpoint:
+    health:
+      show-components: always
+      probes.enabled: true
+      show-details: always
   endpoints:
     web:
       exposure:
@@ -20,8 +29,6 @@ management:
 zeebe:
   client:
     worker.defaultName: ${spring.application.name}
-    broker.gatewayAddress: 127.0.0.1:26500
-    security.plaintext: true
     job.timeout: 5000
 
 logging:
@@ -31,14 +38,28 @@ logging:
 
 ---
 spring:
-  profiles: local
+  config:
+    activate:
+      on-profile: local
   data:
     mongodb:
       uri: mongodb://booking:password@localhost:27017/booking?replicaSet=rs0
 
+zeebe:
+  client:
+    broker.gatewayAddress: localhost:26500
+    security.plaintext: true
+
 ---
 spring:
-  profiles: docker
+  config:
+    activate:
+      on-profile: docker
   data:
     mongodb:
       uri: mongodb://booking:password@mongo:27017/booking?replicaSet=rs0
+
+zeebe:
+  client:
+    broker.gatewayAddress: zeebe:26500
+    security.plaintext: true

@@ -211,13 +211,17 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 1. Connect to the Zeebe Cluster.
 
-    In order to interact with the services inside the cluster you need to use `port-forward` to route traffic from your environment to the cluster.
+    * Kubernetes::
 
-    > Using docker-compose it is not necessary since `localhost:26500` is already exposed
+    In order to interact with the services inside the cluster you need to use `port-forward` to route traffic from your environment to the cluster.
 
     ```bash
     kubectl port-forward -n zeebe svc/zeebe-dev-zeebe-gateway 26500:26500
     ```
+
+    * docker-compose:
+
+    `docker-compose -f docker/docker-compose.yaml up`
 
 2. Once you have your connection to your cluster you can deploy our process definition by running:
 
@@ -286,6 +290,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     ```bash
     cd  src/zeebe-worker-spring-boot/
+    mvn clean package
     mvn spring-boot:run
     ```
 
@@ -319,6 +324,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     ```bash
     cd  src/zeebe-rest-spring-boot/
+    mvn clean package
     mvn spring-boot:run
     ```
 
@@ -338,7 +344,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
     curl http://localhost:8081/classify/reason
     ```
 
-5. Verify current calls using Zeebe Operate.
+5. Verify current calls using Zeebe Operate at (http://localhost:8080).
 
     ![All Process run](images/rest-process-all.png)
 
@@ -362,6 +368,7 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
     ```bash
     cd  src/zeebe-rest-spring-boot/
+    mvn clean package
     mvn spring-boot:run
     ```
 
@@ -397,4 +404,69 @@ Zeebe CLI is the Command Line Interface. By default is configured to point to lo
 
 ## SAGA Pattern Demo
 
-![Zeebe](./images/saga-example.png)
+1. Build and run `zeebe-saga-spring-boot`
+
+    ```bash
+    # Build and create Far Jar files for the microservices
+    cd src/zeebe-saga-spring-boot
+    mvn clean install 
+
+    # Build the images using maven spring boot plugin
+    mvn spring-boot:build-image
+    ```
+
+2. Verify the images created by the previous build
+
+     ```bash
+     # Use docker to list the images created.
+     docker images
+
+    REPOSITORY                                          TAG                                                     IMAGE ID       CREATED         SIZE
+    ...
+    jsa4000/flight-microservice                         1.0.0-SNAPSHOT                                          d058b75bd583   41 years ago    293MB
+    jsa4000/hotel-microservice                          1.0.0-SNAPSHOT                                          d74b39bc37dd   41 years ago    293MB
+    jsa4000/booking-microservice                        1.0.0-SNAPSHOT                                          99f196bf2652   41 years ago    293MB
+    jsa4000/car-microservice                            1.0.0-SNAPSHOT                                          ef2495212f66   41 years ago    293MB
+    paketobuildpacks/builder                            base                                                    1f124c766673   41 years ago    661MB
+     ```
+
+3. Deploy a local environment for development using docker-compose
+
+    > This method use the docker compose v2 with docker compose integrated into Docker CLI. It shares the same docker network (`zeebe_network`)
+
+    ```bash
+    # Clean and prune all the cache and volumes (or execute a bash file '~/docker-clean')
+    docker system prune -f
+    docker volume prune -f
+    docker image prune -f
+    docker network prune -f
+
+    # Open a terminal with three horizontal tabs to see the outputs from docker compose runs
+
+    # Deploy Zeebe Cluster
+    docker compose --project-name zeebe -f docker/docker-compose.yaml up
+
+    # Deploy MongoDB Cluster
+    MONGO_REPLICASET_HOST=mongo docker compose --project-name zeebe  -f src/zeebe-saga-spring-boot/docker/docker-compose-mongo.yaml up
+
+    # Deploy Microservices
+    docker compose --project-name zeebe  -f src/zeebe-saga-spring-boot/docker/docker-compose-micros.yaml up
+    ```
+
+4. Test Microservices HealthCheck to verify every thing it is working
+
+    ```bash
+    # Booking Service
+    curl http://localhost:8081/actuator/health | jq .
+    ```
+
+5. Deploy `saga-example.bpmn` into local Zeebe cluster
+
+    > It can be deployed directly by using **Camunda Modeler**
+
+    ```bash
+    # Deploy bpmn version 2
+    zbctl deploy workflows/saga-example.bpmn --insecure  
+    ```
+
+    ![Zeebe](./images/saga-example.png)

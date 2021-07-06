@@ -17,24 +17,25 @@ services:
       - ./files/mongo:/docker-entrypoint-initdb.d:ro
     command: mongod --bind_ip_all --replSet rs0
     networks:
-      - docker-internal
+      - zeebe_network
 
   mongo-setup:
     container_name: mongo-setup
     image: mongo:4.2.8
     restart: on-failure
     environment:
-      #MONGO_REPLICASET_HOST: mongo # [localhost, mongo]
+      MONGO_REPLICASET_HOST: "${MONGO_REPLICASET_HOST:-localhost}" # [localhost, mongo]
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - ./files/mongo-setup:/scripts
     entrypoint: [ "/scripts/setup-single.sh" ]
     networks:
-      - docker-internal
+      - zeebe_network
     depends_on:
       - mongo
 
 networks:
-  docker-internal:
-    name: docker-internal
+  zeebe_network:
+    external:
+      name: zeebe_network
